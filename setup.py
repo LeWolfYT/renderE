@@ -177,7 +177,7 @@ def downloadDS():
         ]))
     pp = os.path.join(mypath, "domesticpy", "conf", "playman.py")
     
-    dt = r.get(f"https://archive.lewolfyt.cc/{dss}/twc/domestic/conf/playman.py")
+    dt = r.get(f"https://archive.lewolfyt.cc/{dss}/twc/conf/playman.py")
     if dt.ok:
         with open(pp, "w") as f:
             f.write(dt.text)

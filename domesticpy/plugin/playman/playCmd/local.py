@@ -221,7 +221,7 @@ else:
                 _cull()
                 Log.info('Ended _run for ID: %s' % (id,))
             except:
-                errorFlag = 'run: Exception occurred running job id ' + id
+                errorFlag = 'run: Exception occurred running job id ' + str(id)
 
             if errorFlag == None and timeForChannelChange == 1:
                 domestic.wxdata.changeIrdChannel(irdChannel)
