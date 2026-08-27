@@ -161,6 +161,6 @@ if __name__ == "__main__":
     except:
         tb.print_exc()
     try:
-        process('Config.0.Radar_LocalDoppler')
+        process('Config.1.Radar_LocalDoppler')
     except:
         tb.print_exc()
