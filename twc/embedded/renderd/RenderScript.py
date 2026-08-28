@@ -639,7 +639,10 @@ class Clock(GraphicRenderable):
 
     def get_format(self):
         now = datetime.now(tz=self.tz)
-        return now.strftime(self.format.replace("%l", str(int(now.strftime("%I"))))).replace("<z>", self.timezoneDisplay)
+        i = str(int(now.strftime("%I")))
+        if nh.personality != "Watt":
+            i = i.rjust(2)
+        return now.strftime(self.format.replace("%l", i)).replace("<z>", self.timezoneDisplay)
 
     def process(self):
         if self.processed:
