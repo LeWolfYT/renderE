@@ -1781,7 +1781,7 @@ else:
                 draw_quad(item, vidtex, off=extra["off"])
         elif isinstance(item, DummyQuad):
             draw_quad(item)
-        elif isinstance(item, Text) or isinstance(item, Clock):
+        elif isinstance(item, (Text, Clock)):
             rl.rl_set_blend_mode(rl.BlendMode.BLEND_ALPHA_PREMULTIPLY)
             xo = 0
             if type(item) == Marquee:
@@ -1789,6 +1789,9 @@ else:
                 item.pos %= ((item.ksize or get_text_size(item.s, tuple([round(c*255) for c in item._color]), item.fnt, item))[0]+(720 if not item.bounds else item.bounds[0]))
                 xo = round(item.pos-(720 if not item.bounds else item.bounds[0]))
             
+            queued = False
+            if item.rtex is None:
+                item.process()
             if item.rtex is not None:
                 sc = (scr and (twc.personalityCode > 1))
                 tex = item.rtex.texture
@@ -1802,10 +1805,19 @@ else:
                 #renderElog("has rtex", item._position)
                 
                 draw_quad(item, tex, off=(item.draw_off[0]+extra["off"][0]-xo, item.draw_off[1]+extra["off"][1]+item.top_offset*sc), premult=True)
-            else:
-                renderElog("no rtex")
-                rg.text_queue.append(item)
+            
             rl.rl_set_blend_mode(rl.BlendMode.BLEND_ALPHA)
+            if isinstance(item, Clock):
+                new_s = item.get_format()
+                if item.lasts != new_s:
+                    item.s = new_s
+                    item.lasts = new_s
+                    item.processed = False
+                    rl.unload_render_texture(item.rtex)
+                    item.rtex = None
+                    item.process()
+            if item.rtex is None:
+                rg.text_queue.append(item)
         elif isinstance(item, RichText):
             for i in item.items:
                 draw_item(i, {"off": item._position})
@@ -1865,12 +1877,12 @@ else:
                 if isinstance(ch, CompositeRenderable) and not (type(ch) is RichText):
                     #if VERBOSE and (xx2p != 0 or yy2p != 0):
                     #    renderElog(xx2p, yy2p)
-                    renderElog("ancestry dna", ancestry_dna)
-                    renderElog("expect", item._position, ch._position)
+                    #renderElog("ancestry dna", ancestry_dna)
+                    #renderElog("expect", item._position, ch._position)
                     draw_item(ch, extra={"tex": item.rtex, "cam": camera2, "off": camoff})
                     #ancestry_dna[0] -= xx2p
                     #ancestry_dna[1] -= yy2p
-                    renderElog("ancestry dna2", ancestry_dna)
+                    #renderElog("ancestry dna2", ancestry_dna)
                     rl.begin_texture_mode(item.rtex)
                     rl.rl_set_clip_planes(0.01, 10000)
                     # if isinstance(item, RichText):
@@ -2121,7 +2133,7 @@ else:
             item.top_offset = top_o
             rl.begin_texture_mode(item.rtex)
             rl.rl_set_blend_mode(rl.BlendMode.BLEND_ALPHA_PREMULTIPLY)
-            #rl.clear_background(rl.RED)
+            rl.clear_background(rl.BLANK)
             for l in glist:
                 if l not in clist:
                     continue
