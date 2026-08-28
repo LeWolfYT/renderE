@@ -612,8 +612,12 @@ class Clock(GraphicRenderable):
         self.justification = justification
         self.timezone = timezone
         self.timezoneDisplay = timezoneDisplay
-        self.s = '10:09'
-        self.lasts = ''
+        if timezone == "":
+            self.tz = None
+        else:
+            self.tz = dut.tz.gettz(timezone)
+        self.s = self.get_format()
+        self.lasts = self.s+""
         self.cachedtex = None
         self.cachedimg = None
         self.cimg = None
@@ -624,12 +628,7 @@ class Clock(GraphicRenderable):
         self.draw_off = (0, 0)
         self.text_bounds = (0, 0)
         self.processed = False
-        if timezone == "":
-            self.tz = None
-        else:
-            self.tz = dut.tz.gettz(timezone)
-        self.s = self.get_format()
-        self.lasts = self.s+""
+        
         
         self._lastcol = tuple(list(self._color))
         #self._textsize = self.textbase.size
@@ -640,7 +639,7 @@ class Clock(GraphicRenderable):
 
     def get_format(self):
         now = datetime.now(tz=self.tz)
-        return now.strftime(self.format.replace("%l", str(int(now.strftime("%I"))).rjust(2))).replace("<z>", self.timezoneDisplay)
+        return now.strftime(self.format.replace("%l", str(int(now.strftime("%I"))))).replace("<z>", self.timezoneDisplay)
 
     def process(self):
         if self.processed:
@@ -722,7 +721,7 @@ def get_text_size(s, col, font : TTFont, store=None):
         store.ksize = out
     return out
 
-def build_glyph_list(x, y, s, col, font : TTFont, top=False):
+def build_glyph_list(x, y, s, col, font : TTFont, top=False, more=False):
     """
     Outputs a list of coordinates and textures for drawing text.
     This should make the new text system a BIT less horrible to work with.
@@ -734,6 +733,7 @@ def build_glyph_list(x, y, s, col, font : TTFont, top=False):
     glist = set()
     clist = {}
     i = 1
+    max_x = 0
     for char in s:
         glist.add(char)
         last_char = (i == len(s))
@@ -753,13 +753,17 @@ def build_glyph_list(x, y, s, col, font : TTFont, top=False):
                 if not s[i] == "\n":
                     kern = font.font.get_kerning(ord(char), ord(s[i]), mode=0).x / 64.0
                     xx += kern
+            max_x = max(max_x, xx)
             if tracking:
                 xx += (font.tracking() * font.pointSize() / 2000)
         i += 1
     
     under = font.get_char("_", col)
     top_o = under.image.height - under.bearing + 4
-    return glist, clist, char_to_glyph, top_o
+    if more:
+        return glist, clist, char_to_glyph, top_o, max_x
+    else:
+        return glist, clist, char_to_glyph, top_o
 
 class Text(GraphicRenderable):
 
@@ -784,16 +788,16 @@ class Text(GraphicRenderable):
         if self.processed:
             return
         self.processed = True
-        glist, clist, ctg, top_o = build_glyph_list(0, 0, self.s, tuple([round(c*255) for c in self._color]), self.fnt)
+        glist, clist, ctg, top_o, max_x = build_glyph_list(0, 0, self.s, tuple([round(c*255) for c in self._color]), self.fnt, more=True)
         vv = list(ctg.values())
         try:
             x_min = min([min(x, key=lambda val: val[0]) for x in vv], key=lambda val: val[0])[0]
         except:
             return
         y_min = min([min(y, key=lambda val: val[1]) for y in vv], key=lambda val: val[1])[1]
-        x_mx = max([max(x, key=lambda val: val[0]+val[2]) for x in vv], key=lambda val: val[0]+val[2])
+        #x_mx = max([max(x, key=lambda val: val[0]+val[2]) for x in vv], key=lambda val: val[0]+val[2])
         y_mx = max([max(y, key=lambda val: val[1]+val[3]) for y in vv], key=lambda val: val[1]+val[3])
-        x_max = x_mx[0]+x_mx[2]
+        x_max = max_x #x_mx[0]+x_mx[2]
         y_max = y_mx[1]+y_mx[3]
         rtw = abs(x_max-x_min)
         rth = abs(y_max-y_min)
@@ -1812,6 +1816,9 @@ class AudioEffectSequencer(Renderable):
         self.total += duration
         return
 
+    def reset(self):
+        self.timer = -1
+        self.activeeffects.clear()
 
 class AudioNullEffect(AudioEffect):
 

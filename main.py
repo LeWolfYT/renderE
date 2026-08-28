@@ -1671,6 +1671,8 @@ else:
                 reset_effects_tree(item)
         if type(ef) is EffectSequencer:
             return
+        if type(ef) is AudioEffectSequencer:
+            return
         if not hasattr(ef, "effects"):
             return
         for effect in ef.effects:
