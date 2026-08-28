@@ -788,17 +788,18 @@ else:
             return
         seq.timer += 1
         if seq.timer >= seq.total and seq.repeat:
-            seq.timer = seq.timerdefault+0
-            for ef in seq.effects:
-                if hasattr(ef[0], "timer"):
-                    ef[0].timer = 0
-                if hasattr(ef[0], "frame"):
-                    ef[0].frame = 0
-                if hasattr(ef[0], "frozen"):
-                    ef[0].frozen = False
-                if hasattr(ef[0], "fired"):
-                    ef[0].fired = False
-            seq.activeeffects = []
+            seq.reset()
+            # seq.timer = seq.timerdefault+0
+            # for ef in seq.effects:
+            #     if hasattr(ef[0], "timer"):
+            #         ef[0].timer = 0
+            #     if hasattr(ef[0], "frame"):
+            #         ef[0].frame = 0
+            #     if hasattr(ef[0], "frozen"):
+            #         ef[0].frozen = False
+            #     if hasattr(ef[0], "fired"):
+            #         ef[0].fired = False
+            # seq.activeeffects = []
         
         al = []
         al.append(seq.effects[0][1])
@@ -1798,15 +1799,18 @@ else:
                 sc = (scr and (twc.personalityCode > 1))
                 tex = item.rtex.texture
                 ho = (0, 0)
+                clo = 0
                 if type(item) == Clock:
                     if item.justification == Clock.CENTER:
                         xo = item.rtex.texture.width/2
+                        clo = item.rtex.texture.width
                     if item.justification == Clock.RIGHT:
                         xo = item.rtex.texture.width
+                        clo = item.rtex.texture.width
                 #renderElog(item.draw_off)
                 #renderElog("has rtex", item._position)
                 
-                draw_quad(item, tex, off=(item.draw_off[0]+extra["off"][0]-xo, item.draw_off[1]+extra["off"][1]+item.top_offset*sc), premult=True)
+                draw_quad(item, tex, off=(item.draw_off[0]+extra["off"][0]-xo, item.draw_off[1]+extra["off"][1]+item.top_offset*sc), premult=True, clo=clo)
             
             rl.rl_set_blend_mode(rl.BlendMode.BLEND_ALPHA)
             if isinstance(item, Clock):

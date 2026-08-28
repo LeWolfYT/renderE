@@ -1704,7 +1704,7 @@ class AudioEffect(Effect):
 import random
 class EffectSequencer(Renderable):
 
-    def __init__(self, target, repeat=0, loopLimit=0):
+    def __init__(self, target, repeat=0, loopLimit=0, debug=False):
         self.effects = []
         self.activeeffects = []
         self.timer = (not getattr(target, "added", True))-1 #+target.seq_start_after #first frame is time 0 but 1 gets added first
@@ -1721,7 +1721,9 @@ class EffectSequencer(Renderable):
         return
 
     def reset(self):
-        self.timer = self.timerdefault+0
+        #renderElog("FEMBOYS", self.effects, self.activeeffects, self.timer, self.timerdefault)
+        #self.timer = self.timerdefault+0
+        self.timer = 0
         self.activeeffects = []
         for effect in self.effects:
             if type(effect) is tuple:
