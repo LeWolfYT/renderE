@@ -1,5 +1,8 @@
 import struct
 from PIL import Image
+import threading as th
+from io import BytesIO
+import rendereglobals as rg
 
 def loadmv(data):
     def read_u32(offset):
@@ -15,15 +18,7 @@ def loadmv(data):
     
     frames = []
 
-    for frameix in range(1, nframes + 1):
-        start = (frameix - 1) * bpf
-        frame_start = start + 32
-
-        if frame_start >= len(data):
-            print(f"frame {frameix} data is out of range")
-            break
-
-        raw = data[frame_start:frame_start + bpf]
+    def process_one(frameix, raw):
         if len(raw) < bpf:
             raw += b"\x00" * (bpf - len(raw)) #padding because apparently that's a thing
 
@@ -34,6 +29,25 @@ def loadmv(data):
 
         img = Image.frombuffer("RGBA", (width, height), bytes(frame_bytes), "raw", "BGRA", 0, 1)
         img = img.transpose(Image.FLIP_TOP_BOTTOM)
-        frames.append(img)
+        arr = BytesIO()
+        img.save(arr, format="PNG")
+        arr = arr.getvalue()
+        img = rg.rl.load_image_from_memory('.png', arr, len(arr))
+        rg.rl.image_alpha_premultiply(img)
+        frames.append((img, frameix))
+
+    ts = []
+    for frameix in range(1, nframes + 1):
+        start = (frameix - 1) * bpf
+        frame_start = start + 32
+        if frame_start >= len(data):
+            print(f"frame {frameix} data is out of range")
+            break
+        t = th.Thread(target=process_one, args=(frameix, data[frame_start:frame_start + bpf]))
+        ts.append(t)
+        t.start()
     
-    return frames
+    for t in ts:
+        t.join()
+    
+    return [f[0] for f in sorted(frames, key=lambda x: x[1])]
