@@ -2278,6 +2278,9 @@ else:
         
         if rl.is_key_pressed(rl.KeyboardKey.KEY_GRAVE):
             SAVECR = not SAVECR
+
+        if rl.is_key_pressed(rl.KeyboardKey.KEY_F):
+            rl.toggle_fullscreen()
         
         if DEBUG:
             if rl.is_key_pressed(rl.KeyboardKey.KEY_X):

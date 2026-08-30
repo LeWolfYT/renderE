@@ -2,6 +2,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import messagebox
 import subprocess
+import argparse
 import sys
 import time
 import threading as th
@@ -22,6 +23,17 @@ DEBUG = False
 
 if DEBUG == True:
     print("Debugging mode enabled.")
+
+parser = argparse.ArgumentParser(description="Loops LFs and encodes data.")
+parser.add_argument("item", nargs="?", default="", help="The item to encode data for. Leave blank to encode all data except tag data.")
+parser.add_argument("-ns", "--nosensor", action="store_true", help="Excludes sensor data for CC.")
+parser.add_argument("-wxs", "--weatherscan", action="store_true", help="Enables Weatherscan data mode.")
+parser.add_argument("-nt", "--notraffic", action="store_true", help="Disables traffic data.")
+parser.add_argument("-nb", "--nobulletins", action="store_true", help="Only encode non-bulletin things.")
+parser.add_argument("-a", "--automatic", action="store_true", help="Encodes new data every 20 minutes.")
+parser.add_argument("-c", "--calm", action="store_true", help="Runs data encoding sequentially instead of all at once.")
+
+args = parser.parse_args()
 
 preroll = tk.IntVar(root, 8)
 
@@ -47,8 +59,8 @@ def run():
 def encodE():
     while encodEing:
         if DEBUG == True:
-            print("Running encodE!")
-        subprocess.run([sys.executable, "encodE.py"])
+            print("Running encodE with arguments: {}".format(args))
+        subprocess.run([sys.executable, "encodE.py", *sys.argv[1:]])
         if stop_encodE_event.wait(600):
             break
 
@@ -105,7 +117,7 @@ def stopencodEcommand():
         messagebox.showerror("encodE isnt running!", "Not encodEing, start it first!")
 
 # All lot8s flavors
-lot8s_options = ["Select an Option", "D - 60 seconds", "E - 60 seconds", "K - 90 seconds", "O - 90 seconds", "N - 120 seconds", "L - 120 seconds", "M - 120 seconds", "S - Squeezeback"]
+lot8s_options = ["Select an Option", "D - 60 seconds", "E - 60 seconds", "K - 90 seconds", "O - 90 seconds", "N - 120 seconds", "L - 120 seconds", "M - 120 seconds", "S - Squeezeback", "Z - LOT8S LDL (WATT ONLY)"]
 
 # Set blank option string
 value_inside = tk.StringVar(root)

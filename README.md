@@ -38,8 +38,9 @@ encodE is a data encoder bundled with RenderE. To use it, follow these instructi
 
 * `-ns` and `--nosensor` disable SENSOR data that causes CC to show a mixed-case title
 * `-wxs` and `--weatherscan` enable a mode that works with Weatherscan
-* `-nb` and `--nobulletins` disables bulletins
 * `-nt` and `--notraffic` disables traffic (if a key is added to the file)
+* `-nb` and `--nobulletins` disables bulletins
+* `-a` and `--automatic` encodes new data every 20 minutes
 * `-c` and `--calm` run data encoding at a slower pace to use less CPU
 
 ## Support
