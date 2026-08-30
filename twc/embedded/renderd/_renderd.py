@@ -73,20 +73,13 @@ def createIcon(self, name, evict=0):
         data = f.read()
     
     print("loading mv ", name)
-    self._frames = libmv.loadmv(data)
+    #self._frames = libmv.loadmv(data)
+    self._ims = libmv.loadmv(data)
+    
     
     #self._rframes = [rl.ffi.new('char []', fr.tobytes()) for fr in self._frames]
     self.idx = 0
-    self.framect = len(self._frames)
-
-    self._ims = []
-    for f in self._frames:
-        arr = BytesIO()
-        f.save(arr, format="PNG")
-        arr = arr.getvalue()
-        img = rl.load_image_from_memory('.png', arr, len(arr))
-        rl.image_alpha_premultiply(img)
-        self._ims.append(img)
+    self.framect = len(self._ims)
     
     self.textures = None
     self._size = (self._ims[0].width, self._ims[0].height)

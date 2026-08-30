@@ -220,6 +220,14 @@ else:
     runrs = patches.runrs
     runrsc = patches.runrsc
 
+    def fail_saver():
+        while True:
+            time.sleep(10)
+            with open("fails.json", "w") as f:
+                json.dump(list(nh.fails), f)
+
+    th.Thread(target=fail_saver, daemon=True).start()
+
     def sockethandle():
         if VERBOSE:
             renderElog("Socket handler initialized!")
@@ -801,6 +809,9 @@ else:
             #         ef[0].fired = False
             # seq.activeeffects = []
         
+        if seq.timer >= seq.total and not seq.repeat:
+            seq.clippervalid = False
+        
         al = []
         al.append(seq.effects[0][1])
         
@@ -931,11 +942,13 @@ else:
             #     if not effect.frozen:
             #         effect.frame += 1
             
-        def loopover(eflist):
+        def loopover(eflist, cv=True):
             for effect in eflist:
+                if type(effect) is Clipper and not cv:
+                    continue
                 if type(effect) == EffectSequencer:
                     updateseq(effect)
-                    loopover(effect.activeeffects)
+                    loopover(effect.activeeffects, cv=effect.clippervalid)
                 else:
                     applyeffect(effect)
         loopover(effects)
@@ -1181,6 +1194,9 @@ else:
         
         q_width = quad._size[0]
         q_height = quad._size[1]
+
+        q_width_base = q_width+0
+        q_height_base = q_height+0
         
         x_off = 0
         y_off = 0
@@ -1226,6 +1242,9 @@ else:
                 if crb:
                     qx -= crb[4] * pX
                     qy -= crb[5] * pY
+            elif type(effect) == SetSizeScale:
+                q_width = q_width_base * effect.w
+                q_height = q_height_base * effect.h
             elif type(effect) == SetPosition:
                 if not se:
                     #xxw = (-quad._size[0]/2-effect.x)/720*(xxx*2)
@@ -1295,12 +1314,14 @@ else:
             #     if not effect.frozen and not se:
             #         effect.frame += 1
         
-        def loopover(eflist):
+        def loopover(eflist, cv=True):
             for effect in eflist:
+                if type(effect) is Clipper and not cv:
+                    continue
                 if type(effect) == EffectSequencer:
                     if (not se) and (not se2):
                         updateseq(effect)
-                    loopover(effect.activeeffects)
+                    loopover(effect.activeeffects, cv=effect.clippervalid)
                 else:
                     applyeffect(effect)
         loopover(effects)
@@ -1875,7 +1896,7 @@ else:
             global ancestry_dna
             old_toff = toff.copy()
             for iii, ch in enumerate(item.items):
-                toff = [old_toff[0]+xx2p, old_toff[1]+yy2p]#[old_toff[0]+xx2p,old_toff[1]+yy2p]
+                toff = [xx2p, yy2p]#[old_toff[0]+xx2p,old_toff[1]+yy2p]
                 if isinstance(item, ScrollingCompositeRenderable):
                     camoff = (720+xx+item.scroll, 0)
                     #if isinstance(ch, Text):

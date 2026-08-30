@@ -819,6 +819,8 @@ class Text(GraphicRenderable):
         return
 
     def size(self):
+        if self.s == "":
+            return (0, self.fnt.l)#abs(self.fnt.ascender)+abs(self.fnt.descender))
         self.process()
         return self.text_bounds #ksize or get_text_size(self.s, tuple([round(c*255) for c in self._color]), self.fnt, self)
 
@@ -1198,7 +1200,7 @@ class LineRenderer(GraphicRenderable):
         self.thickness = round(thickness)
         self.rgba = (1, 1, 1, 1)
         self.cached = None
-        return
+        self.tx = None
 
     def drawLines(self):
         if self._size == (0, 0):
@@ -1716,6 +1718,7 @@ class EffectSequencer(Renderable):
         self.skipped = 0
         
         self.target = target
+        self.clippervalid = True
         
         target.addEffectSequencer(self, repeat, loopLimit)
         return
