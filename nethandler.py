@@ -21,6 +21,13 @@ def newjoin(*args):
         pp = pp + "/"
     return pp.replace("\\", "/")
 
+fj = newjoin(os.path.dirname(os.path.abspath(__file__)), "fails.json")
+if os.path.exists(fj):
+    with open(fj, "r") as f:
+        fails = set(json.load(f))
+else:
+    fails = set()
+
 try:
     with open(newjoin(os.path.dirname(os.path.abspath(__file__)), "servers.json")) as f:
         elems = json.loads(f.read())
@@ -64,12 +71,16 @@ def requestNetAsset(path : str, extensions, check=False):
             print(spath)
             if offline:
                 continue
+            if spath in fails:
+                continue
             if r.head(spath).ok:
                 os.makedirs(os.path.dirname(out), exist_ok=True)
                 f = open(out, "wb")
                 f.write(r.get(spath, allow_redirects=True).content)
                 f.close()
                 return out
+            else:
+                fails.add(spath)
     print(f"NET ERROR: couldn't find anything for {path}")
     return None
 
@@ -90,11 +101,15 @@ def requestNetAssetExt(path : str, ext=None, check=False):
         print(spath)
         if offline:
             continue
+        if spath in fails:
+            continue
         if r.head(spath).ok:
             os.makedirs(os.path.dirname(out), exist_ok=True)
             f = open(out, "wb")
             f.write(r.get(spath, allow_redirects=True).content)
             f.close()
             return out
+        else:
+            fails.add(spath)
     print(f"NET ERROR: couldn't find anything for {path}"+("."+ext if ext else ""))
     return None
