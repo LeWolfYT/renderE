@@ -155,6 +155,7 @@ else:
                 pres.bkgAudioFilename = None
                 if pres.channelChangeRequest == 1 or pres.alternateFeedActive == 1:
                     pres.bkgAudioFilename = _getBkgAudioFilename()
+        pres.bkgAudioFilename = _getBkgAudioFilename()
         (pres.ldlBulletins, pres.ldlWarningMode, pres.activeWarnings) = _activeBulletins()
         pres.lasCrawlText = _getLasCrawlText()
         scheds = _selectSchedule(pres)
