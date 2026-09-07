@@ -54,6 +54,7 @@ expiretime = time.time()+30*60
 
 stationmap = { #maps closed stations onto not-closed stations
     "KPFN": "KECP",
+    "KPBI": "KDJT" #THIS IS WHY WE CAN'T HAVE NICE THINGS
     #"KNXX": "KLOM"
 }
 
