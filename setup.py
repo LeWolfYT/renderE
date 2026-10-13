@@ -6,6 +6,7 @@ import os
 import sys
 import json
 import subprocess as sp
+import threading as th
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -306,6 +307,8 @@ def serverchange(sv):
     page_vars["playmanalt"] = os.path.exists(os.path.join(mypath, "domesticpy", "conf", "playman"+brands[sv]+".py"))
     page_vars["playman_dest"] = getUniquePath(os.path.join(mypath, "domesticpy", "conf", "playman"+last_brand+".py"))
     page_vars["playman_swap"] = os.path.join(mypath, "domesticpy", "conf", "playman"+brands[sv]+".py")
+    if brands[sv] == "WxScan":
+        page_vars["playman_swap"] = None
 
 def move_ass():
     np = os.path.join(mypath, "net")
@@ -322,8 +325,11 @@ def move_pm():
     pp = os.path.join(mypath, "domesticpy", "conf", "playman.py")
     if os.path.exists(pp):
         sh.move(pp, page_vars["playman_dest"])
-        
-        dt = r.get(page_vars["newsvr"] + "twc/domestic/conf/playman.py")
+        if page_vars["newsvr"] == "WxScanLive":
+            return
+        path = "http://archive.lewolfyt.cc/" + page_vars["newsvr"] + "/usr/twc/domestic/conf/playman.py"
+        print(path)
+        dt = r.get(path)
         if dt.ok:
             with open(pp, "w") as f:
                 f.write(dt.text)
@@ -332,7 +338,8 @@ def swap_pm():
     pp = os.path.join(mypath, "domesticpy", "conf", "playman.py")
     if os.path.exists(pp):
         sh.move(pp, page_vars["playman_dest"])
-        sh.move(page_vars["playman_swap"], pp)
+        if page_vars["playman_swap"]:
+            sh.move(page_vars["playman_swap"], pp)
 
 serveropts = [pg.image.load(os.path.join(mypath, "setup", f"server{i+1}.png")) for i in range(4)]
 serveracts = []
@@ -487,10 +494,14 @@ def check_essential_data():
             ]
         }
 
-def download_essential_data():
+e_log = ""
+def d_essential_thread():
     efurl = page_vars["hasEF"]
     url_base = os.path.dirname(efurl)
-    for file in r.get(efurl).text.strip().split("\n"):
+    global e_log
+    files = r.get(efurl).text.strip().split("\n")
+    for i, file in enumerate(files):
+        e_log = f"({i+1}/{len(files)}) {file}"
         try:
             out_name = os.path.join(mypath, "net", file)
             out_dir = os.path.dirname(out_name)
@@ -501,6 +512,18 @@ def download_essential_data():
                     f.write(data)
         except Exception as e:
             print(f"Error downloading {file}: {e}")
+
+def download_essential_data():
+    global e_log
+    e_log = ""
+    t = th.Thread(target=d_essential_thread)
+    t.start()
+    while t.is_alive():
+        pg.event.pump()
+        pg.draw.rect(win, (0, 0, 0), pg.Rect(0, 0, 720, 40))
+        win.blit(pg.transform.smoothscale_by(fn.render(e_log, True, (255, 255, 255)), (0.5, 1)), (0, 5))
+        rwin.flip()
+        pg.time.wait(100)
 
 pagemap = {
     "init": {
