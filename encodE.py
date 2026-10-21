@@ -216,7 +216,7 @@ if not doonly or only == "text":
         print(times)
         print("starting textfcst!")
         try:
-            textfcst = r.get(f"https://api.weather.com/v1/geocode/{'/'.join(cidmap[override if override else textfcstcoop])}/forecast/daily/10day.json?language=en-US&units=e&apiKey=e1f10a1e78da46f5b10a1e78da96f525").json()["forecasts"]
+            textfcst = r.get(f"https://api.weather.com/v1/geocode/{'/'.join(cidmap[override if override else textfcstcoop])}/forecast/daily/10day.json?language=en-US&units=e&apiKey=71f92ea9dd2f4790b92ea9dd2f779061").json()["forecasts"]
 
             done = 0
             ix = 0
@@ -308,7 +308,7 @@ if not doonly or only == "fcst":
             print(f"starting forecast data for {ci}!")
             print(cidmap[ci])
             #dat = r.get(f"https://wx.lewolfyt.cc?geo={','.join(cidmap[ci])}&extendeddays=10").json()
-            forecasts = r.get(f"https://api.weather.com/v1/geocode/{'/'.join(cidmap[ci])}/forecast/daily/10day.json?language=en-US&units=e&apiKey=e1f10a1e78da46f5b10a1e78da96f525").json()["forecasts"]
+            forecasts = r.get(f"https://api.weather.com/v1/geocode/{'/'.join(cidmap[ci])}/forecast/daily/10day.json?language=en-US&units=e&apiKey=71f92ea9dd2f4790b92ea9dd2f779061").json()["forecasts"]
             
             for i in range(9):
                 forecast = forecasts[i]
@@ -326,7 +326,7 @@ if not doonly or only == "fcst":
                     data.daySkyCondition = forecast["day"]["icon_extd"]
                     data.dayChanceOfPrecip = forecast["day"]["pop"]
                     data.dayPrecipType = forecast["day"]["precip_type"]
-                    data.daySnowAccum = forecast["day"]["snow_qpf"] or None
+                    data.daySnowAccum = forecast["day"]["snow_code"] or None
                     data.dayWindSpeed = forecast["day"]["wspd"]
                     data.dayWindDir = windmap[forecast["day"]["wdir_cardinal"]]
                     data.dayRelHumidity = forecast["day"]["rh"]
@@ -339,7 +339,7 @@ if not doonly or only == "fcst":
                     data.eveningSkyCondition = forecast_next["night"]["icon_extd"]
                     data.eveningChanceOfPrecip = forecast_next["night"]["pop"]
                     data.eveningPrecipType = forecast_next["night"]["precip_type"]
-                    data.eveningSnowAccum = forecast_next["night"]["snow_qpf"] or None
+                    data.eveningSnowAccum = forecast_next["night"]["snow_code"] or None
                     data.eveningWindSpeed = forecast_next["night"]["wspd"]
                     data.eveningWindDir = windmap[forecast_next["night"]["wdir_cardinal"]]
                     data.eveningRelHumidity = forecast_next["night"]["rh"]
@@ -416,27 +416,27 @@ if only == "tag":
         y,m,d,H,M,S,wd,day,dst = time.localtime(time.time())
         IdxDate = int(time.mktime((y, m, d, 0, 0, 0, 0, 0, -1)))
         IdxDate2 = int(time.mktime((y, m, d+1, 0, 0, 0, 0, 0, -1)))
-        mosquito = r.get(f"https://api.weather.com/v2/indices/mosquito/daily/15day?geocode={','.join(cidmap[primarycoop])}&language=en-US&format=json&apiKey=e1f10a1e78da46f5b10a1e78da96f525").json()["mosquitoIndex24hour"]["eveningMosquitoIndex"]
+        mosquito = r.get(f"https://api.weather.com/v2/indices/mosquito/daily/15day?geocode={','.join(cidmap[primarycoop])}&language=en-US&format=json&apiKey=71f92ea9dd2f4790b92ea9dd2f779061").json()["mosquitoIndex24hour"]["eveningMosquitoIndex"]
         dsm.set(f"evening_mosquito.{idx}.{IdxDate}", twccommon.Data(dayIndex=mosquito[0]), expiretime)
         dsm.set(f"evening_mosquito.{idx}.{IdxDate2}", twccommon.Data(dayIndex=mosquito[1]), expiretime)
         
-        grillby_s = r.get(f"https://api.weather.com/v2/indices/travel/daypart/15day?geocode={','.join(cidmap[primarycoop])}&language=en-US&format=json&apiKey=e1f10a1e78da46f5b10a1e78da96f525").json()["travelIndex12hour"]
+        grillby_s = r.get(f"https://api.weather.com/v2/indices/travel/daypart/15day?geocode={','.join(cidmap[primarycoop])}&language=en-US&format=json&apiKey=71f92ea9dd2f4790b92ea9dd2f779061").json()["travelIndex12hour"]
         second_day = (1 if grillby_s["dayInd"][0]=="N" else 2)
         dsm.set(f"sight_seeing.{idx}.{IdxDate}", twccommon.Data(dayIndex=grillby_s["leisureTravelIndex"][0]), expiretime)
         dsm.set(f"sight_seeing.{idx}.{IdxDate2}", twccommon.Data(dayIndex=grillby_s["leisureTravelIndex"][second_day]), expiretime)
         
-        bonehurtingjuice = r.get(f"https://api.weather.com/v2/indices/achePain/daypart/15day?geocode={','.join(cidmap[primarycoop])}&language=en-US&format=json&apiKey=e1f10a1e78da46f5b10a1e78da96f525").json()["achesPainsIndex12hour"]
+        bonehurtingjuice = r.get(f"https://api.weather.com/v2/indices/achePain/daypart/15day?geocode={','.join(cidmap[primarycoop])}&language=en-US&format=json&apiKey=71f92ea9dd2f4790b92ea9dd2f779061").json()["achesPainsIndex12hour"]
         second_day = (1 if bonehurtingjuice["dayInd"][0]=="N" else 2)
         dsm.set(f"achesAndPain.{idx}.{IdxDate}", twccommon.Data(dayIndex=bonehurtingjuice["achesPainsIndex"][0]), expiretime)
         dsm.set(f"achesAndPain.{idx}.{IdxDate2}", twccommon.Data(dayIndex=bonehurtingjuice["achesPainsIndex"][second_day]), expiretime)
         
-        peelingoffmyskin = r.get(f"https://api.weather.com/v2/indices/drySkin/daypart/15day?geocode={','.join(cidmap[primarycoop])}&language=en-US&format=json&apiKey=e1f10a1e78da46f5b10a1e78da96f525").json()["drySkinIndex12hour"]
+        peelingoffmyskin = r.get(f"https://api.weather.com/v2/indices/drySkin/daypart/15day?geocode={','.join(cidmap[primarycoop])}&language=en-US&format=json&apiKey=71f92ea9dd2f4790b92ea9dd2f779061").json()["drySkinIndex12hour"]
         second_day = (1 if peelingoffmyskin["dayInd"][0]=="N" else 2)
         dsm.set(f"dry_skin.{idx}.{IdxDate}", twccommon.Data(dayIndex=peelingoffmyskin["drySkinIndex"][0]), expiretime)
         dsm.set(f"dry_skin.{idx}.{IdxDate2}", twccommon.Data(dayIndex=peelingoffmyskin["drySkinIndex"][second_day]), expiretime)
         
         
-        ow_my_lungs = r.get(f"https://api.weather.com/v2/indices/pollen/daypart/15day?geocode={','.join(cidmap[primarycoop])}&language=en-US&format=json&apiKey=e1f10a1e78da46f5b10a1e78da96f525").json()["pollenForecast12hour"]
+        ow_my_lungs = r.get(f"https://api.weather.com/v2/indices/pollen/daypart/15day?geocode={','.join(cidmap[primarycoop])}&language=en-US&format=json&apiKey=71f92ea9dd2f4790b92ea9dd2f779061").json()["pollenForecast12hour"]
         second_day = (1 if ow_my_lungs["dayInd"][0] == "N" else 2)
         dsm.set(f"pollen.{primpollen}", twccommon.Data(
             treePollen=ow_my_lungs["treePollenIndex"][0],
@@ -844,7 +844,7 @@ if (not doonly or only == "headlines") and not (nb or wxs):
     def getheadlines():
         try:
             print("getting headlines for", headlinecounty)
-            alerts = r.get(f"https://api.weather.com/v3/alerts/headlines?areaId={headlinecounty}:US&format=json&language=en-US&apiKey=e1f10a1e78da46f5b10a1e78da96f525").json()
+            alerts = r.get(f"https://api.weather.com/v3/alerts/headlines?areaId={headlinecounty}:US&format=json&language=en-US&apiKey=71f92ea9dd2f4790b92ea9dd2f779061").json()
             hexpiretime = 1
             headlines = []
             vocal = []
