@@ -22,10 +22,10 @@ def newjoin(*args):
     return pp.replace("\\", "/")
 
 fj = newjoin(os.path.dirname(os.path.abspath(__file__)), "fails.json")
-if os.path.exists(fj):
+try:
     with open(fj, "r") as f:
         fails = set(json.load(f))
-else:
+except:
     fails = set()
 
 try:
